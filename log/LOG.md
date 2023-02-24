@@ -18,4 +18,4 @@ Using [this medium post](https://medium.com/@ivan.ha/using-d3-js-to-plot-an-inte
 
 This problem had me stumped for quite some time. I entered my geoJSON into several online resources and it appeared to render correctly in all of them. I dug a little deeper and found out that d3 actually cares about the ordering of the coordinates, whereas standard geoJSON processors do not. To fix the issue it was as simple as reversing the coordinate ordering in the geoJSON, which I could accomplish using [this online tool](https://observablehq.com/@bumbeishvili/rewind-geojson).
 
-I also acquired Blue Bike station data from the Blue Bike official website and added the information to the repository. ([System data source](https://www.bluebikes.com/system-data))
+I also acquired Blue Bike station data from the Blue Bike official website and added the information to the repository ([System data source](https://www.bluebikes.com/system-data)). I was then able to plot basic circles on the graph to represent the stations, and also add the station name to the page when one is highlighted.
