@@ -2,6 +2,8 @@
 
 Purpose of this file is to log the work and effort that went into developing the final product. This project requires a lot of learning for me, so I want to remember the steps it took to get me to the end.
 
+This also serves as a place to credit resources that I used to create this project (and for me to reference them if I need them again in the future).
+
 ## 2/23/2023 - Data Collection
 
 The goal of this project is initially to create an interactive map of Boston. Since Blue Bike stations span all across the greater Boston area I needed to create a map file that would represent the region. Through research, I learned the easiest way to do this would be using the geojson file format. However I quickly ran into obstacles when I could not easily find existing geoJSONs for Boston's neighboring cities. Enter the OpenStreetMaps API.

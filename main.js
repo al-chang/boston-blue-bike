@@ -1,6 +1,6 @@
 // Constants
 
-const MAP_FINAL_URL = "/data/map-final/greaterboston.geojson";
+const MAP_FINAL_URL = "data/map-final/greaterboston.geojson";
 
 const geoJsonResponse = await fetch(MAP_FINAL_URL);
 const geoJson = await geoJsonResponse.json();
