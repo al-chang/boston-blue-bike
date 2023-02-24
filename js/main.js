@@ -1,9 +1,9 @@
+import { projectCoordinates } from "./dataTransformation.js";
+
 // Constants
 
 const MAP_FINAL_URL = "data/map-final/greaterboston.geojson";
-
-const geoJsonResponse = await fetch(MAP_FINAL_URL);
-const geoJson = await geoJsonResponse.json();
+const BLUE_BIKE_STATION_URL = "data/bluebike/bluebike_station.csv";
 
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
@@ -14,6 +14,12 @@ const ZOOM_DURATION = 500;
 const ZOOM_IN_STEP = 2;
 const ZOOM_OUT_STEP = 1 / ZOOM_IN_STEP;
 const HOVER_COLOR = "#d36f80";
+
+// Load data
+const geoJsonResponse = await fetch(MAP_FINAL_URL);
+const geoJson = await geoJsonResponse.json();
+
+const blueBikeStations = await d3.csv(BLUE_BIKE_STATION_URL);
 
 // --------------- Event handler ---------------
 const zoom = d3.zoom().scaleExtent(ZOOM_THRESHOLD).on("zoom", zoomHandler);
@@ -50,20 +56,35 @@ const projection = d3
 
 // Prepare svg
 const path = d3.geoPath().projection(projection);
-const color = d3.scaleOrdinal(d3.schemeCategory10);
+const color = d3.scaleOrdinal(d3.schemeSet3);
 
 // Plot geojson
-renderMap(geoJson);
+renderMap();
 
-function renderMap(root) {
-  // Draw districts and register event listeners
+function renderMap() {
+  // Draw neighborshoods of Boston
+  const projectedStations = projectCoordinates(blueBikeStations, projection);
+
   g.append("g")
     .selectAll("path")
-    .data(root.features)
+    .data(geoJson.features)
     .enter()
     .append("path")
     .attr("d", path)
-    .attr("fill", (d, i) => color(i))
+    .attr("fill", (_d, i) => color(i))
     .attr("stroke", "#FFF")
-    .attr("stroke-width", 0.5);
+    .attr("stroke-width", 0.5)
+    .on("mouseenter", (_e, d) => {
+      console.log(d.properties.name);
+    });
+
+  g.append("g")
+    .selectAll("circle")
+    .data(projectedStations)
+    .enter()
+    .append("circle")
+    .attr("cx", (d) => d.projectedLongitude)
+    .attr("cy", (d) => d.projectedLatitude)
+    .attr("r", 2)
+    .style("fill", "red");
 }
