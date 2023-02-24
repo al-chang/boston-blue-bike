@@ -28,6 +28,12 @@ function zoomHandler(event) {
   g.attr("transform", event.transform);
 }
 
+const mouseEnterStationHandler = (_e, d) => {
+  const stationName = d["Name"];
+  const stationNameConatiner = document.querySelector("#station-name");
+  stationNameConatiner.innerHTML = `Selected Station: ${stationName}`;
+};
+
 // Prep svg
 const svg = d3
   .select("#boston-map")
@@ -86,5 +92,6 @@ function renderMap() {
     .attr("cx", (d) => d.projectedLongitude)
     .attr("cy", (d) => d.projectedLatitude)
     .attr("r", 2)
-    .style("fill", "red");
+    .attr("fill", "red")
+    .on("mouseenter", mouseEnterStationHandler);
 }
