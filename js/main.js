@@ -1,12 +1,7 @@
 import { projectCoordinates } from "./dataTransformation.js";
+import { geoJson, blueBikeStations } from "./dataLoad.js";
 
-// Constants
-
-const MAP_FINAL_URL = "data/map-final/greaterboston.geojson";
-const MASS_MAP_URL = "data/maps/massachusetts.geojson";
-const WATER_URL = "data/maps/water.geojson";
-const BLUE_BIKE_STATION_URL = "data/bluebike/bluebike_station.csv";
-
+// --------------- Constants ---------------
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 const ZOOM_THRESHOLD = [1, 7];
@@ -19,18 +14,6 @@ const ZOOM_OUT_STEP = 1 / ZOOM_IN_STEP;
 const HOVER_COLOR = "#d36f80";
 const WATER_COLOR = "#d4f1f9";
 const LAND_COLOR = "#34A56F";
-
-// Load data
-const geoJsonResponse = await fetch(MAP_FINAL_URL);
-const geoJson = await geoJsonResponse.json();
-
-const massMapResponse = await fetch(MASS_MAP_URL);
-const massMapJson = await massMapResponse.json();
-
-const massWaterResponse = await fetch(WATER_URL);
-const massWaterJson = await massWaterResponse.json();
-
-const blueBikeStations = await d3.csv(BLUE_BIKE_STATION_URL);
 
 // --------------- Event handler ---------------
 const zoomHandler = (e) => g.attr("transform", e.transform);
@@ -67,10 +50,11 @@ const color = d3.scaleOrdinal(d3.schemeSet3);
 // Plot geojson
 renderMap();
 
+// Draw neighborshoods of Boston
 function renderMap() {
-  // Draw neighborshoods of Boston
   const projectedStations = projectCoordinates(blueBikeStations, projection);
 
+  // Draw state border of MA
   // g.append("g")
   //   .selectAll("path")
   //   .data(massMapJson.features)
@@ -79,6 +63,7 @@ function renderMap() {
   //   .attr("d", path)
   //   .attr("fill", LAND_COLOR);
 
+  // Add gaps of water for Charles and Mystic rivers
   // g.append("g")
   //   .selectAll("path")
   //   .data(massWaterJson.features)
@@ -89,6 +74,7 @@ function renderMap() {
 
   let resetColor = null;
 
+  // Draw regions of Boston area
   g.append("g")
     .selectAll("path")
     .data(geoJson.features)
@@ -108,6 +94,7 @@ function renderMap() {
       region.setAttribute("fill", resetColor);
     });
 
+  // Draw the BlueBike stations
   g.append("g")
     .selectAll("circle")
     .data(projectedStations)
