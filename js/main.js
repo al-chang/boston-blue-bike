@@ -3,11 +3,12 @@ import { projectCoordinates } from "./dataTransformation.js";
 // Constants
 
 const MAP_FINAL_URL = "data/map-final/greaterboston.geojson";
+const MASS_MAP_URL = "data/maps/massachusetts.geojson";
 const BLUE_BIKE_STATION_URL = "data/bluebike/bluebike_station.csv";
 
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
-const ZOOM_THRESHOLD = [0.3, 7];
+const ZOOM_THRESHOLD = [1, 7];
 const OVERLAY_MULTIPLIER = 10;
 const OVERLAY_OFFSET = OVERLAY_MULTIPLIER / 2 - 0.5;
 const ZOOM_DURATION = 500;
@@ -19,14 +20,15 @@ const HOVER_COLOR = "#d36f80";
 const geoJsonResponse = await fetch(MAP_FINAL_URL);
 const geoJson = await geoJsonResponse.json();
 
+const massMapResponse = await fetch(MASS_MAP_URL);
+const massMapJson = await massMapResponse.json();
+
 const blueBikeStations = await d3.csv(BLUE_BIKE_STATION_URL);
 
 // --------------- Event handler ---------------
-const zoom = d3.zoom().scaleExtent(ZOOM_THRESHOLD).on("zoom", zoomHandler);
+const zoomHandler = (e) => g.attr("transform", e.transform);
 
-function zoomHandler(event) {
-  g.attr("transform", event.transform);
-}
+const zoom = d3.zoom().scaleExtent(ZOOM_THRESHOLD).on("zoom", zoomHandler);
 
 const mouseEnterStationHandler = (_e, d) => {
   const stationName = d["Name"];
@@ -42,16 +44,6 @@ const svg = d3
   .attr("height", "100%");
 
 const g = svg.call(zoom).append("g");
-
-g.append("rect")
-  .attr("width", WIDTH * OVERLAY_MULTIPLIER)
-  .attr("height", HEIGHT * OVERLAY_MULTIPLIER)
-  .attr(
-    "transform",
-    `translate(-${WIDTH * OVERLAY_OFFSET},-${HEIGHT * OVERLAY_OFFSET})`
-  )
-  .style("fill", "none")
-  .style("pointer-events", "all");
 
 // Align projection
 const projection = d3
@@ -73,6 +65,18 @@ function renderMap() {
 
   g.append("g")
     .selectAll("path")
+    .data(massMapJson.features)
+    .enter()
+    .append("path")
+    .attr("d", path)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", 0.5);
+
+  let resetColor = null;
+
+  g.append("g")
+    .selectAll("path")
     .data(geoJson.features)
     .enter()
     .append("path")
@@ -80,8 +84,14 @@ function renderMap() {
     .attr("fill", (_d, i) => color(i))
     .attr("stroke", "#FFF")
     .attr("stroke-width", 0.5)
-    .on("mouseenter", (_e, d) => {
-      console.log(d.properties.name);
+    .on("mouseenter", (e, d) => {
+      const region = e.target;
+      resetColor = region.getAttribute("fill");
+      region.setAttribute("fill", HOVER_COLOR);
+    })
+    .on("mouseleave", (e, d) => {
+      const region = e.target;
+      region.setAttribute("fill", resetColor);
     });
 
   g.append("g")

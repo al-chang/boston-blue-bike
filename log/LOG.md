@@ -8,7 +8,7 @@ This also serves as a place to credit resources that I used to create this proje
 
 The goal of this project is initially to create an interactive map of Boston. Since Blue Bike stations span all across the greater Boston area I needed to create a map file that would represent the region. Through research, I learned the easiest way to do this would be using the geojson file format. However I quickly ran into obstacles when I could not easily find existing geoJSONs for Boston's neighboring cities. Enter the OpenStreetMaps API.
 
-Following advice found in [this stackoverflow post](https://gis.stackexchange.com/questions/183248/getting-polygon-boundaries-of-city-in-json-from-google-maps-api), it is possible to extract a geoJSON from OpenStreetMaps for any city that they have defined boundaries of. This made it very easy to collect geoJSONs.
+Following advice found in [this stackexchange post](https://gis.stackexchange.com/questions/183248/getting-polygon-boundaries-of-city-in-json-from-google-maps-api), it is possible to extract a geoJSON from OpenStreetMaps for any city that they have defined boundaries of. This made it very easy to collect geoJSONs.
 
 ## 2/24/2023 - Map Data Cleaning
 
@@ -19,3 +19,5 @@ Using [this medium post](https://medium.com/@ivan.ha/using-d3-js-to-plot-an-inte
 This problem had me stumped for quite some time. I entered my geoJSON into several online resources and it appeared to render correctly in all of them. I dug a little deeper and found out that d3 actually cares about the ordering of the coordinates, whereas standard geoJSON processors do not. To fix the issue it was as simple as reversing the coordinate ordering in the geoJSON, which I could accomplish using [this online tool](https://observablehq.com/@bumbeishvili/rewind-geojson).
 
 I also acquired Blue Bike station data from the Blue Bike official website and added the information to the repository ([System data source](https://www.bluebikes.com/system-data)). I was then able to plot basic circles on the graph to represent the stations, and also add the station name to the page when one is highlighted.
+
+This is what the map looks like after the culmination of all previous work mentioned: ![text](./images/iteration1-2-24-2023.png)
