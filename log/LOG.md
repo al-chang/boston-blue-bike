@@ -21,3 +21,9 @@ This problem had me stumped for quite some time. I entered my geoJSON into sever
 I also acquired Blue Bike station data from the Blue Bike official website and added the information to the repository ([System data source](https://www.bluebikes.com/system-data)). I was then able to plot basic circles on the graph to represent the stations, and also add the station name to the page when one is highlighted.
 
 This is what the map looks like after the culmination of all previous work mentioned: ![text](./images/iteration1-2-24-2023.png)
+
+## 2/27/2023 - Reactive Reload and Code Splitting
+
+I've come to realize that as this project grows it will become unsustainable to keep everything in `main.js`, so I am making my best effort in splitting the code into multiple files as much as possible. This is proving to be somewhat difficult to manage already because of the various event handlers and dependencies that need to be defined in particular orders. It has been fairly straightforward to move utility functions into their own files, but a lot of the data rendering and re-drawing will need to be better managed.
+
+Something else I've been playing around with is re-rendering the visualizations. So far I've just test a simple re-rendering of the station circles sizes on zoom. I don't plan to use size of the mark as a channel to convey information to the viewer, so re-sizing the stations just makes the map more legible when a user zooms in. It works by using the `k` value provided from the `zoom` event. However, this value scales exponentially and grows larger as the user zooms further, so I created a simple function to take the multiplicative inverse to shrink the stations as the user zooms. This proved to be a fairly easy challenge to tackle, and sets up a nice paradigm for how re-rendering should be handled. I also added a debounce function that will hopefully be useful down the road as well.

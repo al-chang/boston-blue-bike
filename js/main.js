@@ -19,7 +19,7 @@ const LAND_COLOR = "#34A56F";
 // --------------- Event handlers ---------------
 const debouncedStationRender = debounce((zoomScale) => {
   clearBlueBikeStations();
-  renderBlueBikeStations(zoomScale, 3, 1);
+  renderBlueBikeStations(zoomScale, 3, 0.75);
 }, 400);
 
 const zoomHandler = (e) => {
