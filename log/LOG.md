@@ -27,3 +27,11 @@ This is what the map looks like after the culmination of all previous work menti
 I've come to realize that as this project grows it will become unsustainable to keep everything in `main.js`, so I am making my best effort in splitting the code into multiple files as much as possible. This is proving to be somewhat difficult to manage already because of the various event handlers and dependencies that need to be defined in particular orders. It has been fairly straightforward to move utility functions into their own files, but a lot of the data rendering and re-drawing will need to be better managed.
 
 Something else I've been playing around with is re-rendering the visualizations. So far I've just test a simple re-rendering of the station circles sizes on zoom. I don't plan to use size of the mark as a channel to convey information to the viewer, so re-sizing the stations just makes the map more legible when a user zooms in. It works by using the `k` value provided from the `zoom` event. However, this value scales exponentially and grows larger as the user zooms further, so I created a simple function to take the multiplicative inverse to shrink the stations as the user zooms. This proved to be a fairly easy challenge to tackle, and sets up a nice paradigm for how re-rendering should be handled. I also added a debounce function that will hopefully be useful down the road as well.
+
+My current idea for the final project is to have the map sticky on the right side of the screen as you scroll. There will be 2-3 different data visualizations on the right side that scroll into view. The map adjusts its appearance based on what visualization is currenlty most visible.
+
+- Vis 1 would be of station usage throughout the months
+- Vis 2 would be which stations see most usage between one another
+- Vis 3 not sure yet
+
+The hardest part of this might just be finding a way to cleanly transition the map between different states (through animation)

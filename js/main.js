@@ -1,9 +1,10 @@
 import { projectCoordinates } from "./dataTransformation.js";
 import { geoJson, blueBikeStations } from "./dataLoad.js";
 import { debounce, scaleZoom } from "./utils.js";
+import { blueScale } from "./colorScheme.js";
 
 // --------------- Constants ---------------
-const WIDTH = window.innerWidth;
+const WIDTH = window.innerWidth / 2;
 const HEIGHT = window.innerHeight;
 const ZOOM_THRESHOLD = [1, 7];
 const OVERLAY_MULTIPLIER = 10;
@@ -29,12 +30,6 @@ const zoomHandler = (e) => {
 
 const zoom = d3.zoom().scaleExtent(ZOOM_THRESHOLD).on("zoom", zoomHandler);
 
-const mouseEnterStationHandler = (_e, d) => {
-  const stationName = d["Name"];
-  const stationNameConatiner = document.querySelector("#station-name");
-  stationNameConatiner.innerHTML = `Selected Station: ${stationName}`;
-};
-
 // Prep svg
 const svg = d3
   .select("#boston-map")
@@ -56,7 +51,6 @@ const projectedStations = projectCoordinates(blueBikeStations, projection);
 
 // Prepare svg
 const path = d3.geoPath().projection(projection);
-const color = d3.scaleOrdinal(d3.schemeSet3);
 
 function renderMassachusettsBorder() {
   g.append("g")
@@ -79,7 +73,23 @@ function renderMasschusettsWater() {
 }
 
 function renderBostonRegions() {
+  const color = d3.scaleOrdinal(blueScale);
+  // Event handlers
   let resetColor = null;
+  const mouseEnterRegionHandler = (e, d) => {
+    const region = e.target;
+    resetColor = region.getAttribute("fill");
+    region.setAttribute("fill", HOVER_COLOR);
+
+    const regionName = d.properties.name;
+    const regionNameContainer = document.querySelector("#region-name");
+    regionNameContainer.innerHTML = `Selected Region: ${regionName}`;
+  };
+
+  const mouseLeaveRegionHandler = (e, _d) => {
+    const region = e.target;
+    region.setAttribute("fill", resetColor);
+  };
 
   // Draw regions of Boston area
   g.append("g")
@@ -91,18 +101,18 @@ function renderBostonRegions() {
     .attr("fill", (_d, i) => color(i))
     .attr("stroke", "#FFF")
     .attr("stroke-width", 0.5)
-    .on("mouseover", (e, _d) => {
-      const region = e.target;
-      resetColor = region.getAttribute("fill");
-      region.setAttribute("fill", HOVER_COLOR);
-    })
-    .on("mouseleave", (e, _d) => {
-      const region = e.target;
-      region.setAttribute("fill", resetColor);
-    });
+    .on("mouseenter", mouseEnterRegionHandler)
+    .on("mouseleave", mouseLeaveRegionHandler);
 }
 
 function renderBlueBikeStations(scaleValue) {
+  // Event handlers
+  const mouseEnterStationHandler = (_e, d) => {
+    const stationName = d["Name"];
+    const stationNameConatiner = document.querySelector("#station-name");
+    stationNameConatiner.innerHTML = `Selected Station: ${stationName}`;
+  };
+
   // Draw the BlueBike stations
   g.append("g")
     .attr("data-container", "stations")
