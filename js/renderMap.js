@@ -1,6 +1,6 @@
 import { projectCoordinates } from "./dataTransformation.js";
 import { geoJson, blueBikeStations } from "./dataLoad.js";
-import { debounce, scaleZoom } from "./utils.js";
+import { debounce, scaleZoom, calcOffset } from "./utils.js";
 import { blueScale } from "./colorScheme.js";
 
 // --------------- Constants ---------------
@@ -140,21 +140,27 @@ function renderBlueBikeStations(scaleValue) {
     const stationName = d["Name"];
     const stationNameContainer = d3.select('g[data-container="stations"]');
     const connectionContainer = d3.select('g[data-container="connections"]');
-    connectionContainer.append("circle");
 
     stationNameContainer.innerHTML = `Selected Station: ${stationName}`;
     const c = d3.select("circle").data()[0];
+    const { offsetX, offsetY } = calcOffset(
+      d.projectedLongitude,
+      d.projectedLatitude,
+      c.projectedLongitude,
+      c.projectedLatitude,
+      d3.select("circle").attr("r")
+    );
     connectionContainer
       .append("line")
       .style("stroke", "black")
-      .attr("x1", d.projectedLongitude)
-      .attr("y1", d.projectedLatitude)
+      .attr("x1", d.projectedLongitude + offsetX)
+      .attr("y1", d.projectedLatitude + offsetY)
       .attr("x2", d.projectedLongitude)
       .attr("y2", d.projectedLatitude)
       .transition()
       .duration(200)
-      .attr("x2", c.projectedLongitude)
-      .attr("y2", c.projectedLatitude);
+      .attr("x2", c.projectedLongitude - offsetX)
+      .attr("y2", c.projectedLatitude - offsetY);
   };
 
   const mouseLeaveStationHandler = (_e, d) => {
@@ -175,7 +181,7 @@ function renderBlueBikeStations(scaleValue) {
     .on("mouseleave", mouseLeaveStationHandler)
     .transition()
     .duration(300)
-    .attr("r", scaleZoom(scaleValue, 3, 0.75));
+    .attr("r", scaleZoom(scaleValue, 3, 1));
 }
 
 function clearBlueBikeStations() {
