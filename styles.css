@@ -13,5 +13,9 @@ body {
   width: 50%;
   border: 1px solid black;
   position: sticky;
-  top: 10px;
+  top: 5vh;
+}
+
+#region1 {
+  height: 100vh;
 }

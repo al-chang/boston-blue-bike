@@ -17,18 +17,42 @@ const HOVER_COLOR = "#d36f80";
 const WATER_COLOR = "#d4f1f9";
 const LAND_COLOR = "#34A56F";
 
+let GLOBAL_K = 1;
+
 // --------------- Event handlers ---------------
-const debouncedStationRender = debounce((zoomScale) => {
-  clearBlueBikeStations();
-  renderBlueBikeStations(zoomScale, 3, 0.75);
+const debouncedStationResize = debounce((zoomScale) => {
+  d3.select('g[data-container="stations"]')
+    .selectAll("circle")
+    .transition()
+    .duration(300)
+    .attr("r", scaleZoom(zoomScale, 3, 0.75));
 }, 400);
 
 const zoomHandler = (e) => {
   g.attr("transform", e.transform);
-  debouncedStationRender(e.transform.k);
+  GLOBAL_K = e.transform.k;
+  debouncedStationResize(GLOBAL_K);
 };
 
 const zoom = d3.zoom().scaleExtent(ZOOM_THRESHOLD).on("zoom", zoomHandler);
+
+// --------------- Intersection Observers ---------------
+const observer = new IntersectionObserver(
+  (entries) => {
+    const entry = entries.pop();
+    console.log(entries, entry, entry.isIntersecting);
+    if (entry.isIntersecting) {
+      clearBlueBikeStations();
+    } else {
+      renderBlueBikeStations(GLOBAL_K);
+    }
+  },
+  {
+    rootMargin: "0px",
+    threshold: 0,
+  }
+);
+observer.observe(document.querySelector("#region2"));
 
 // Prep svg
 const svg = d3
@@ -99,10 +123,14 @@ function renderBostonRegions() {
     .append("path")
     .attr("d", path)
     .attr("fill", (_d, i) => color(i))
-    .attr("stroke", "#FFF")
+    .attr("stroke", "black")
     .attr("stroke-width", 0.5)
     .on("mouseenter", mouseEnterRegionHandler)
     .on("mouseleave", mouseLeaveRegionHandler);
+}
+
+function renderBlueBikeStationsContainer() {
+  g.append("g").attr("data-container", "stations");
 }
 
 function renderBlueBikeStations(scaleValue) {
@@ -113,31 +141,36 @@ function renderBlueBikeStations(scaleValue) {
     stationNameConatiner.innerHTML = `Selected Station: ${stationName}`;
   };
 
-  // Draw the BlueBike stations
-  g.append("g")
-    .attr("data-container", "stations")
+  const stationContainer = d3.select('g[data-container="stations"]');
+  stationContainer
     .selectAll("circle")
     .data(projectedStations)
     .enter()
     .append("circle")
     .attr("cx", (d) => d.projectedLongitude)
     .attr("cy", (d) => d.projectedLatitude)
-    .attr("r", scaleZoom(scaleValue, 3, 1))
     .attr("fill", "red")
-    .on("mouseenter", mouseEnterStationHandler);
+    .on("mouseenter", mouseEnterStationHandler)
+    .transition()
+    .duration(300)
+    .attr("r", scaleZoom(scaleValue, 3, 0.75));
 }
 
 function clearBlueBikeStations() {
-  const container = document.querySelector('g[data-container="stations"]');
-  if (container) {
-    container.remove();
-  }
+  d3.select('g[data-container="stations"]')
+    .selectAll("circle")
+    .transition()
+    .duration(300)
+    .attr("r", 0)
+    .transition()
+    .remove();
 }
 
 // Draw neighborhoods of Boston
 const renderMap = () => {
   renderBostonRegions();
-  renderBlueBikeStations(1);
+  renderBlueBikeStationsContainer();
+  renderBlueBikeStations(GLOBAL_K);
 };
 
 // Plot geojson
