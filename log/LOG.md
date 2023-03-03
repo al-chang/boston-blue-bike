@@ -31,7 +31,10 @@ Something else I've been playing around with is re-rendering the visualizations.
 My current idea for the final project is to have the map sticky on the right side of the screen as you scroll. There will be 2-3 different data visualizations on the right side that scroll into view. The map adjusts its appearance based on what visualization is currenlty most visible.
 
 - Vis 1 would be of station usage throughout the months
-- Vis 2 would be which stations see most usage between one another
-- Vis 3 not sure yet
+- Vis 2 would be which stations see most usage between one another, a network graph and the user can control threshold for number of trips to show an edge
 
 The hardest part of this might just be finding a way to cleanly transition the map between different states (through animation)
+
+## 3/2/2023 - Intersection Observer
+
+Currently experimenting with the intersection observer to see if I can make it so that the map on the right side stays pinned but reloads data when scrolling through the page.

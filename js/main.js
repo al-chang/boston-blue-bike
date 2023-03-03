@@ -4,7 +4,7 @@ import { debounce, scaleZoom } from "./utils.js";
 import { blueScale } from "./colorScheme.js";
 
 // --------------- Constants ---------------
-const WIDTH = window.innerWidth / 2;
+const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 const ZOOM_THRESHOLD = [1, 7];
 const OVERLAY_MULTIPLIER = 10;
@@ -69,7 +69,7 @@ const projection = d3
   .geoMercator()
   .center([-71.0589, 42.3601])
   .scale(90000)
-  .translate([WIDTH / 2, HEIGHT / 2]);
+  .translate([WIDTH / 4, HEIGHT / 2]);
 
 const projectedStations = projectCoordinates(blueBikeStations, projection);
 
