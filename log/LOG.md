@@ -38,3 +38,7 @@ The hardest part of this might just be finding a way to cleanly transition the m
 ## 3/2/2023 - Intersection Observer
 
 Currently experimenting with the intersection observer to see if I can make it so that the map on the right side stays pinned but reloads data when scrolling through the page.
+
+## 3/3/2023 - Connections Between Stations
+
+Succesfully added a way to draw lines between different stations. Currently just hardcoded to draw the line to a particular station. Also added JSDoc to the utility functions so that I don't forget what they do.
