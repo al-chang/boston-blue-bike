@@ -71,7 +71,12 @@ const projection = d3
   .scale(90000)
   .translate([WIDTH / 4, HEIGHT / 2]);
 
-const projectedStations = projectCoordinates(blueBikeStations, projection);
+const projectedStations = projectCoordinates(
+  blueBikeStations,
+  projection,
+  "latitude",
+  "longitude"
+);
 
 // Prepare svg
 const path = d3.geoPath().projection(projection);
@@ -124,9 +129,7 @@ function renderBostonRegions() {
     .attr("d", path)
     .attr("fill", (_d, i) => color(i))
     .attr("stroke", "black")
-    .attr("stroke-width", 0.5)
-    .on("mouseenter", mouseEnterRegionHandler)
-    .on("mouseleave", mouseLeaveRegionHandler);
+    .attr("stroke-width", 0.5);
 }
 
 function renderBlueBikeStationsContainer() {
@@ -138,7 +141,7 @@ function renderBlueBikeStations(scaleValue) {
   // Event handlers
   const mouseEnterStationHandler = (_e, d) => {
     const stationName = d["Name"];
-    const stationNameContainer = d3.select('g[data-container="stations"]');
+    const stationNameContainer = d3.select("#station-name");
     const connectionContainer = d3.select('g[data-container="connections"]');
 
     stationNameContainer.innerHTML = `Selected Station: ${stationName}`;
@@ -155,15 +158,15 @@ function renderBlueBikeStations(scaleValue) {
       .style("stroke", "black")
       .attr("x1", d.projectedLongitude + offsetX)
       .attr("y1", d.projectedLatitude + offsetY)
-      .attr("x2", d.projectedLongitude)
-      .attr("y2", d.projectedLatitude)
+      .attr("x2", d.projectedLongitude + offsetX)
+      .attr("y2", d.projectedLatitude + offsetY)
       .transition()
       .duration(200)
       .attr("x2", c.projectedLongitude - offsetX)
       .attr("y2", c.projectedLatitude - offsetY);
   };
 
-  const mouseLeaveStationHandler = (_e, d) => {
+  const mouseLeaveStationHandler = (_e, _d) => {
     const connectionContainer = d3.select('g[data-container="connections"]');
     connectionContainer.selectAll("line").remove();
   };
