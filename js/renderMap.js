@@ -1,7 +1,7 @@
 import { projectCoordinates } from "./dataTransformation.js";
 import { geoJson, blueBikeStations } from "./dataLoad.js";
-import { debounce, scaleZoom, calcOffset } from "./utils.js";
-import { blueScale } from "./colorScheme.js";
+import { debounce, scaleZoom, calcOffset, maxColumn } from "./utils.js";
+import { blueScale, coolScale } from "./colorScheme.js";
 
 // --------------- Constants ---------------
 const WIDTH = window.innerWidth;
@@ -81,26 +81,6 @@ const projectedStations = projectCoordinates(
 // Prepare svg
 const path = d3.geoPath().projection(projection);
 
-function renderMassachusettsBorder() {
-  g.append("g")
-    .selectAll("path")
-    .data(massMapJson.features)
-    .enter()
-    .append("path")
-    .attr("d", path)
-    .attr("fill", LAND_COLOR);
-}
-
-function renderMasschusettsWater() {
-  g.append("g")
-    .selectAll("path")
-    .data(massWaterJson.features)
-    .enter()
-    .append("path")
-    .attr("d", path)
-    .attr("fill", WATER_COLOR);
-}
-
 function renderBostonRegions() {
   const color = d3.scaleOrdinal(blueScale);
   // Event handlers
@@ -140,11 +120,11 @@ function renderBlueBikeStationsContainer() {
 function renderBlueBikeStations(scaleValue) {
   // Event handlers
   const mouseEnterStationHandler = (_e, d) => {
-    const stationName = d["Name"];
+    const stationName = d["name"];
     const stationNameContainer = d3.select("#station-name");
     const connectionContainer = d3.select('g[data-container="connections"]');
 
-    stationNameContainer.innerHTML = `Selected Station: ${stationName}`;
+    stationNameContainer.text(`Selected Station: ${stationName}`);
     const c = d3.select("circle").data()[0];
     const { offsetX, offsetY } = calcOffset(
       d.projectedLongitude,
@@ -171,6 +151,10 @@ function renderBlueBikeStations(scaleValue) {
     connectionContainer.selectAll("line").remove();
   };
 
+  const MAX_TRIPS = maxColumn(projectedStations, "total_trips");
+
+  const color = d3.scaleQuantize().domain([0, MAX_TRIPS]).range(coolScale);
+
   const stationContainer = d3.select('g[data-container="stations"]');
   stationContainer
     .selectAll("circle")
@@ -179,12 +163,12 @@ function renderBlueBikeStations(scaleValue) {
     .append("circle")
     .attr("cx", (d) => d.projectedLongitude)
     .attr("cy", (d) => d.projectedLatitude)
-    .attr("fill", "red")
+    .attr("fill", (d) => color(d.total_trips))
     .on("mouseenter", mouseEnterStationHandler)
     .on("mouseleave", mouseLeaveStationHandler)
     .transition()
     .duration(300)
-    .attr("r", scaleZoom(scaleValue, 3, 1));
+    .attr("r", scaleZoom(scaleValue, 3, 1.5));
 }
 
 function clearBlueBikeStations() {
