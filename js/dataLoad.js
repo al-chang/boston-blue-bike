@@ -18,9 +18,10 @@ export const [geoJson, massMapJson, massWaterJson, blueBikeStations] =
   ]);
 
 // Represents the trips taken each day of the month. Index corresponds to day - 1.
-export const tripsByDay = Array(30).fill(0);
+export const tripsByDay = new Map();
 blueBikeStations.forEach((station) => {
-  for (let i = 0; i < 30; i++) {
-    tripsByDay[i] += parseInt(station[`${i + 1}_total_trips`]);
+  for (let i = 1; i < 31; i++) {
+    const currVal = tripsByDay.get(i) || 0;
+    tripsByDay.set(i, currVal + parseInt(station[`${i}_total_trips`]));
   }
 });
