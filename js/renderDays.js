@@ -1,6 +1,9 @@
 import { tripsByDay } from "./dataLoad.js";
 import { coolScale } from "./colorScheme.js";
 import { debounce } from "./utils.js";
+// --------------- Constants ---------------
+
+const MARGINS = { top: 50, right: 50, bottom: 50, left: 50 };
 
 // --------------- Prep SVG ---------------
 const svg = d3
@@ -29,13 +32,26 @@ const renderDays = () => {
     let numericalDayOfWeek = i + 3;
     svg
       .append("rect")
-      .attr("x", (numericalDayOfWeek % 7) * 50)
-      .attr("y", Math.floor(numericalDayOfWeek / 7) * 20)
-      .attr("width", 10)
-      .attr("height", 10)
+      .attr("x", (numericalDayOfWeek % 7) * 50 + MARGINS.left)
+      .attr("y", Math.floor(numericalDayOfWeek / 7) * 40)
+      .attr("width", 30)
+      .attr("height", 30)
+      .attr("stroke", "green")
+      .attr("stroke-width", 0)
       .attr("fill", color(tripsByDay.get(i)))
-      .on("click", () => {
-        if (!selectedDays.includes(i)) selectedDays.push(i);
+      .on("click", (e) => {
+        const rect = e.target;
+        if (selectedDays.includes(i)) {
+          selectedDays.splice(
+            selectedDays.findIndex((_i) => i === _i),
+            1
+          );
+          rect.setAttribute("stroke-width", "0");
+        } else {
+          selectedDays.push(i);
+          rect.setAttribute("stroke-width", "4");
+        }
+        console.log(selectedDays);
         selectDay();
       });
   }
