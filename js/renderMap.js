@@ -7,15 +7,8 @@ import { blueScale, coolScale } from "./colorScheme.js";
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 const ZOOM_THRESHOLD = [1, 7];
-const OVERLAY_MULTIPLIER = 10;
-const OVERLAY_OFFSET = OVERLAY_MULTIPLIER / 2 - 0.5;
-const ZOOM_DURATION = 500;
-const ZOOM_IN_STEP = 2;
-const ZOOM_OUT_STEP = 1 / ZOOM_IN_STEP;
 
 const HOVER_COLOR = "#d36f80";
-const WATER_COLOR = "#d4f1f9";
-const LAND_COLOR = "#34A56F";
 
 let GLOBAL_K = 1;
 
@@ -36,29 +29,16 @@ const zoomHandler = (e) => {
 
 const zoom = d3.zoom().scaleExtent(ZOOM_THRESHOLD).on("zoom", zoomHandler);
 
-// --------------- Intersection Observers ---------------
-const observer = new IntersectionObserver(
-  (entries) => {
-    const entry = entries.pop();
-    console.log(entries, entry, entry.isIntersecting);
-    if (entry.isIntersecting) {
-      clearBlueBikeStations();
-    } else {
-      renderBlueBikeStations(GLOBAL_K);
-    }
-  },
-  {
-    rootMargin: "0px",
-    threshold: 0,
-  }
-);
-observer.observe(document.querySelector("#region2"));
+// --------------- Prep Map container ---------------
+d3.select("#boston-map").on("selectday", async (e) => {
+  await clearBlueBikeStations();
+  renderBlueBikeStations(GLOBAL_K, e.detail.days);
+});
 
-// Prep svg
+// --------------- Prep SVG ---------------
 const svg = d3
   .select("#boston-map")
   .append("svg")
-  .attr("fill", WATER_COLOR)
   .attr("width", "100%")
   .attr("height", "100%");
 
@@ -117,14 +97,11 @@ function renderBlueBikeStationsContainer() {
   g.append("g").attr("data-container", "connections");
 }
 
-function renderBlueBikeStations(scaleValue) {
+function renderBlueBikeStations(scaleValue, days) {
   // Event handlers
   const mouseEnterStationHandler = (_e, d) => {
-    const stationName = d["name"];
-    const stationNameContainer = d3.select("#station-name");
     const connectionContainer = d3.select('g[data-container="connections"]');
 
-    stationNameContainer.text(`Selected Station: ${stationName}`);
     const c = d3.select("circle").data()[0];
     const { offsetX, offsetY } = calcOffset(
       d.projectedLongitude,
@@ -151,7 +128,10 @@ function renderBlueBikeStations(scaleValue) {
     connectionContainer.selectAll("line").remove();
   };
 
-  const MAX_TRIPS = maxColumn(projectedStations, "total_trips");
+  const MAX_TRIPS =
+    !!days && days.length > 0
+      ? maxColumn(projectedStations, days)
+      : d3.max(projectedStations, (d) => parseInt(d["total_trips"]));
 
   const color = d3.scaleQuantize().domain([0, MAX_TRIPS]).range(coolScale);
 
@@ -163,7 +143,18 @@ function renderBlueBikeStations(scaleValue) {
     .append("circle")
     .attr("cx", (d) => d.projectedLongitude)
     .attr("cy", (d) => d.projectedLatitude)
-    .attr("fill", (d) => color(d.total_trips))
+    .attr("fill", (d) => {
+      if (!!days && days.length > 0) {
+        return color(
+          days.reduce(
+            (total, day) => total + parseInt(d[`${day}_total_trips`]),
+            0
+          )
+        );
+      } else {
+        return color(d.total_trips);
+      }
+    })
     .on("mouseenter", mouseEnterStationHandler)
     .on("mouseleave", mouseLeaveStationHandler)
     .transition()
@@ -172,20 +163,24 @@ function renderBlueBikeStations(scaleValue) {
 }
 
 function clearBlueBikeStations() {
-  d3.select('g[data-container="stations"]')
-    .selectAll("circle")
-    .transition()
-    .duration(300)
-    .attr("r", 0)
-    .transition()
-    .remove();
+  const p = new Promise((resolve) => {
+    d3.select('g[data-container="stations"]')
+      .selectAll("circle")
+      .transition()
+      .duration(150)
+      .attr("r", 0)
+      .transition()
+      .remove()
+      .on("end", () => resolve());
+  });
+  return p;
 }
 
 // Draw neighborhoods of Boston
 const renderMap = () => {
   renderBostonRegions();
   renderBlueBikeStationsContainer();
-  renderBlueBikeStations(GLOBAL_K);
+  renderBlueBikeStations(GLOBAL_K, []);
 };
 
 export default renderMap;

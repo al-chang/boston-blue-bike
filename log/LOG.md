@@ -42,3 +42,7 @@ Currently experimenting with the intersection observer to see if I can make it s
 ## 3/3/2023 - Connections Between Stations
 
 Succesfully added a way to draw lines between different stations. Currently just hardcoded to draw the line to a particular station. Also added JSDoc to the utility functions so that I don't forget what they do.
+
+## 3/13/2023 - Data Cleaning
+
+After a long break from working on this project, I spent all of 3/13 doing data cleaning. The explanation for the data cleaning can be better found in the final write up report for the project. The final cleaned data can be found in this repo, but the code to actually clean the data only exists on my local machine. There is a possiblity that I upload it to GitHub at some point, but I don't see much reason to.

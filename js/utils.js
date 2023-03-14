@@ -45,12 +45,14 @@ export const calcOffset = (x1, y1, x2, y2, r) => {
 };
 
 /**
- * Find the maximum value of a column that contains numerical data
+ * Find the maximum value across multiple rows of columns
  *
  * @param {object} data The data to be parsed
- * @param {string} col The string we want to find the max value of
+ * @param {string[]} cols The string we want to find the max value of
  * @returns The maximum (numerical) value of the column
  */
-export const maxColumn = (data, col) => {
-  return d3.max(data, (d) => parseInt(d[col]));
+export const maxColumn = (data, cols) => {
+  return d3.max(data, (d) =>
+    cols.reduce((total, col) => total + parseInt(d[`${col}_total_trips`]), 0)
+  );
 };

@@ -4,18 +4,20 @@ body {
 }
 
 #vis1-container {
-  height: 200%;
   display: flex;
 }
 
 #boston-map {
-  height: 90vh;
+  height: 98vh;
   width: 50%;
   border: 1px solid black;
-  position: sticky;
-  top: 5vh;
+  margin: auto;
 }
 
-#region1 {
-  height: 100vh;
+.info-col {
+  width: 50%;
+}
+
+#day-container {
+  height: 25vh;
 }
