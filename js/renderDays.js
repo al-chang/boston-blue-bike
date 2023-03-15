@@ -51,7 +51,6 @@ const renderDays = () => {
           selectedDays.push(i);
           rect.setAttribute("stroke-width", "4");
         }
-        console.log(selectedDays);
         selectDay();
       });
   }

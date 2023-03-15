@@ -56,3 +56,17 @@ export const maxColumn = (data, cols) => {
     cols.reduce((total, col) => total + parseInt(d[`${col}_total_trips`]), 0)
   );
 };
+
+export const findMaxX = (data, numMax, val) => {
+  return Object.entries(data)
+    .filter(
+      ([name, count]) =>
+        name !== val && name !== "from_station" && parseInt(count) > 0
+    )
+    .sort(
+      ([_nameA, tripsA], [_nameB, tripsB]) =>
+        parseInt(tripsB) - parseInt(tripsA)
+    )
+    .slice(0, numMax)
+    .map(([name, _count]) => name);
+};

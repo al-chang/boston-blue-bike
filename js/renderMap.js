@@ -1,12 +1,25 @@
 import { projectCoordinates } from "./dataTransformation.js";
-import { geoJson, blueBikeStations } from "./dataLoad.js";
-import { debounce, scaleZoom, calcOffset, maxColumn } from "./utils.js";
+import {
+  geoJson,
+  blueBikeStations,
+  getStationMatrix,
+  getManyStationsMatrices,
+} from "./dataLoad.js";
+import {
+  debounce,
+  scaleZoom,
+  calcOffset,
+  maxColumn,
+  findMaxX,
+} from "./utils.js";
 import { blueScale, coolScale } from "./colorScheme.js";
 
 // --------------- Constants ---------------
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 const ZOOM_THRESHOLD = [1, 7];
+const MAX_STATION_SIZE = 3;
+const MIN_STATION_SIZE = 1.25;
 
 const HOVER_COLOR = "#d36f80";
 
@@ -18,7 +31,7 @@ const debouncedStationResize = debounce((zoomScale) => {
     .selectAll("circle")
     .transition()
     .duration(300)
-    .attr("r", scaleZoom(zoomScale, 3, 0.75));
+    .attr("r", scaleZoom(zoomScale, MAX_STATION_SIZE, MIN_STATION_SIZE));
 }, 400);
 
 const zoomHandler = (e) => {
@@ -97,30 +110,45 @@ function renderBlueBikeStationsContainer() {
   g.append("g").attr("data-container", "connections");
 }
 
-function renderBlueBikeStations(scaleValue, days) {
+async function renderBlueBikeStations(scaleValue, days) {
+  const matrix =
+    !!days && days.length > 0
+      ? await getManyStationsMatrices(days)
+      : await getStationMatrix("total");
   // Event handlers
   const mouseEnterStationHandler = (_e, d) => {
+    const stationIndex = matrix.findIndex(
+      (_station) => _station["from_station"] === d.name
+    );
+    const stationRow = matrix[stationIndex];
+    const mostTripStations = findMaxX(stationRow, 5, d.name);
+    console.log(mostTripStations);
+    console.log(d.name);
+
     const connectionContainer = d3.select('g[data-container="connections"]');
 
-    const c = d3.select("circle").data()[0];
-    const { offsetX, offsetY } = calcOffset(
-      d.projectedLongitude,
-      d.projectedLatitude,
-      c.projectedLongitude,
-      c.projectedLatitude,
-      d3.select("circle").attr("r")
-    );
-    connectionContainer
-      .append("line")
-      .style("stroke", "black")
-      .attr("x1", d.projectedLongitude + offsetX)
-      .attr("y1", d.projectedLatitude + offsetY)
-      .attr("x2", d.projectedLongitude + offsetX)
-      .attr("y2", d.projectedLatitude + offsetY)
-      .transition()
-      .duration(200)
-      .attr("x2", c.projectedLongitude - offsetX)
-      .attr("y2", c.projectedLatitude - offsetY);
+    mostTripStations.forEach((station) => {
+      if (station === "") return;
+      const c = d3.select(`circle[data-station-name="${station}"]`).data()[0];
+      const { offsetX, offsetY } = calcOffset(
+        d.projectedLongitude,
+        d.projectedLatitude,
+        c.projectedLongitude,
+        c.projectedLatitude,
+        d3.select("circle").attr("r")
+      );
+      connectionContainer
+        .append("line")
+        .style("stroke", "black")
+        .attr("x1", d.projectedLongitude + offsetX)
+        .attr("y1", d.projectedLatitude + offsetY)
+        .attr("x2", d.projectedLongitude + offsetX)
+        .attr("y2", d.projectedLatitude + offsetY)
+        .transition()
+        .duration(200)
+        .attr("x2", c.projectedLongitude - offsetX)
+        .attr("y2", c.projectedLatitude - offsetY);
+    });
   };
 
   const mouseLeaveStationHandler = (_e, _d) => {
@@ -143,6 +171,7 @@ function renderBlueBikeStations(scaleValue, days) {
     .append("circle")
     .attr("cx", (d) => d.projectedLongitude)
     .attr("cy", (d) => d.projectedLatitude)
+    .attr("data-station-name", (d) => d.name)
     .attr("fill", (d) => {
       if (!!days && days.length > 0) {
         return color(
@@ -159,7 +188,7 @@ function renderBlueBikeStations(scaleValue, days) {
     .on("mouseleave", mouseLeaveStationHandler)
     .transition()
     .duration(300)
-    .attr("r", scaleZoom(scaleValue, 3, 1.5));
+    .attr("r", scaleZoom(scaleValue, MAX_STATION_SIZE, MIN_STATION_SIZE));
 }
 
 function clearBlueBikeStations() {
