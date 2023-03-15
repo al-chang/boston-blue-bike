@@ -46,3 +46,17 @@ Succesfully added a way to draw lines between different stations. Currently just
 ## 3/13/2023 - Data Cleaning
 
 After a long break from working on this project, I spent all of 3/13 doing data cleaning. The explanation for the data cleaning can be better found in the final write up report for the project. The final cleaned data can be found in this repo, but the code to actually clean the data only exists on my local machine. There is a possiblity that I upload it to GitHub at some point, but I don't see much reason to.
+
+## 3/24/2023 - Connecting the Stations
+
+Much of my focus today was on PM-02. However, I was also able to make significant progress on code related to station connections. There were several tedious and annoying bugs to fix, mostly related to how the data is retrieved. It took a while to figure out if the bug was coming from the cleaned data (possibly prepared incorrectly) or the data retrieval. However, I am fairly confident that I finally got it working and showing the right data. It is responsive to date selection, which has been pretty fun to play around with.
+
+As mentioned, I've been able to add the date selector. This was actually quite simple to do, but it can use quite a bit of prettying up. I am considering switching the color scheme to that of a purple -> red -> orange -> yellow scheme more similar to a heat map as I think it will be more visible than the current green option.
+
+I am able to get the different views to react to changes in one another through events, which is a little complicated because I am splitting the code across multiple files. But I think that this is still better than having a mess of code in a single file, and using events makes for a better experience anyway.
+
+Still considering if the network should be implemented or not. Leaning towards no because drawing the lines on the map does the exact same thing but even better in my opinion. Instead, I think I will go with a matrix that shows data about to and from trips at selected stations, reactive to the choice of day of course.
+
+I've also come up with the idea of selecting regions of Boston and only focusing on the bike stations in those reigons. This way you can better see how stations interact with each other and their popularity relative to each other. The only problem is some regions only have 1 station, so maybe add the ability to select multiple at once? Will have to see, only going to implement this idea if I actually have the extra time.
+
+This is what the map looks like after the culmination of all previous work mentioned: ![text](./images/iteration2-3-14-2023.png)
