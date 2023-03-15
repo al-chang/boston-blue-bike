@@ -122,8 +122,6 @@ async function renderBlueBikeStations(scaleValue, days) {
     );
     const stationRow = matrix[stationIndex];
     const mostTripStations = findMaxX(stationRow, 5, d.name);
-    console.log(mostTripStations);
-    console.log(d.name);
 
     const connectionContainer = d3.select('g[data-container="connections"]');
 
