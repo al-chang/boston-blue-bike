@@ -2,8 +2,8 @@ import { projectCoordinates } from "./dataTransformation.js";
 import {
   geoJson,
   blueBikeStations,
-  getStationMatrix,
-  getManyStationsMatrices,
+  getTripMatrix,
+  getManyTripMatrices,
 } from "./dataLoad.js";
 import {
   debounce,
@@ -71,7 +71,7 @@ const projectedStations = projectCoordinates(
   "longitude"
 );
 
-// Prepare svg
+// Calculate path for regions outlines
 const path = d3.geoPath().projection(projection);
 
 function renderBostonRegions() {
@@ -105,28 +105,37 @@ function renderBostonRegions() {
     .attr("stroke-width", 0.5);
 }
 
+// Add the container for the blue bike stations and connections
 function renderBlueBikeStationsContainer() {
   g.append("g").attr("data-container", "stations");
   g.append("g").attr("data-container", "connections");
 }
 
+// Actually render the blue bike staions, takes the scale to render at and the specific days to render
 async function renderBlueBikeStations(scaleValue, days) {
+  // Retrieve the proper matrix based on the days input
+  // Matrix is formatted such that the row is the "from" station, column is the "to" station
   const matrix =
     !!days && days.length > 0
-      ? await getManyStationsMatrices(days)
-      : await getStationMatrix("total");
+      ? await getManyTripMatrices(days)
+      : await getTripMatrix("total");
+
   // Event handlers
   const mouseEnterStationHandler = (_e, d) => {
+    // Find the row in the station matrix that corresponds to the highlighted station
     const stationIndex = matrix.findIndex(
       (_station) => _station["from_station"] === d.name
     );
+
+    // Get the corresponding row from the matrix and find the X most travelled to stations
     const stationRow = matrix[stationIndex];
     const mostTripStations = findMaxX(stationRow, 5, d.name);
 
+    // Get reference to the HTML container for connection SVGs
     const connectionContainer = d3.select('g[data-container="connections"]');
 
+    // Render a connection for each of the most visited stations
     mostTripStations.forEach((station) => {
-      if (station === "") return;
       const c = d3.select(`circle[data-station-name="${station}"]`).data()[0];
       const { offsetX, offsetY } = calcOffset(
         d.projectedLongitude,
@@ -170,18 +179,16 @@ async function renderBlueBikeStations(scaleValue, days) {
     .attr("cx", (d) => d.projectedLongitude)
     .attr("cy", (d) => d.projectedLatitude)
     .attr("data-station-name", (d) => d.name)
-    .attr("fill", (d) => {
-      if (!!days && days.length > 0) {
-        return color(
-          days.reduce(
-            (total, day) => total + parseInt(d[`${day}_total_trips`]),
-            0
-          )
-        );
-      } else {
-        return color(d.total_trips);
-      }
-    })
+    .attr("fill", (d) =>
+      color(
+        !!days && days.length > 0
+          ? days.reduce(
+              (total, day) => total + parseInt(d[`${day}_total_trips`]),
+              0
+            )
+          : d.total_trips
+      )
+    )
     .on("mouseenter", mouseEnterStationHandler)
     .on("mouseleave", mouseLeaveStationHandler)
     .transition()
@@ -190,6 +197,7 @@ async function renderBlueBikeStations(scaleValue, days) {
 }
 
 function clearBlueBikeStations() {
+  // We remove all the station circles, wrap in a promise in case we want actions dependant on removal
   const p = new Promise((resolve) => {
     d3.select('g[data-container="stations"]')
       .selectAll("circle")

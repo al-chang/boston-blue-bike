@@ -21,3 +21,13 @@ body {
 #day-container {
   height: 25vh;
 }
+
+#tooltip {
+  z-index: 100;
+  position: absolute;
+  background-color: grey;
+  border: solid;
+  border-width: 2px;
+  border-radius: 5px;
+  padding: 5px;
+}

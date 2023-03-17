@@ -30,14 +30,13 @@ blueBikeStations.forEach((station) => {
   }
 });
 
-export const getStationMatrix = async (id) => {
-  const _c = await d3.csv(STATION_MATRIX_URL(id));
-  return _c;
+// Get the matrix for a single day
+export const getTripMatrix = (id) => {
+  return d3.csv(STATION_MATRIX_URL(id));
 };
 
-export const getManyStationsMatrices = async (ids) => {
-  const requests = [];
-  ids.forEach((id) => requests.push(d3.csv(STATION_MATRIX_URL(id))));
+export const getManyTripMatrices = async (ids) => {
+  const requests = ids.map((id) => getTripMatrix(id));
   const matrices = await Promise.all(requests);
   return mergeMatrices(...matrices);
 };
